@@ -1,21 +1,32 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
-import { Box, Typography, MenuItem, TableRow, TableCell } from "@mui/material";
+import {
+  Box,
+  Typography,
+  MenuItem,
+  TableRow,
+  TableCell,
+  TextField,
+} from "@mui/material";
 import TableHead from "@mui/material/TableHead";
 import Paginate from "./Paginate";
 import { useDraggable } from "react-use-draggable-scroll";
 import {
   StyledGrid,
   StyledSelect,
+  StyledSelectForFilter,
   StyledTableCell,
   StyledTableRow,
+  StyledTextField,
 } from "../style";
 import { data, listItem, listProps } from "../type";
+import { getUserList } from "../actions/getUser";
+import { genderOption } from "../data";
 
 const ItemComponent = ({ item, data }: { item: listItem; data: data }) => {
   if (item && item.field === "id") {
@@ -48,7 +59,7 @@ const ItemComponent = ({ item, data }: { item: listItem; data: data }) => {
     return (
       <>
         {data?.friends.map((item: any) => (
-          <ul key={item.id} style={{listStyleType:"none"}}>
+          <ul key={item.id} style={{ listStyleType: "none" }}>
             <li>{item?.name ? item?.name : ""}</li>
           </ul>
         ))}
@@ -60,19 +71,32 @@ const ItemComponent = ({ item, data }: { item: listItem; data: data }) => {
 export default function List(props: listProps) {
   const data = props.rowsData;
   const [perPage, setPerPage] = useState(10);
+  const [gender, setGender] = useState("all");
+  const [age, setAge] = useState<number>();
   const [pageNumber, setPageNumber] = useState(1);
-
-  const totalOrders = 20;
+  const [userList, setUserList] = useState<data[]>([]);
+  const [totalUser, setTotalUser] = useState(0);
   const [selectel, setSelectEl] = useState<null | HTMLElement>(null);
   const open = Boolean(selectel);
   const handleChange = (event: any) => {
     setPerPage(parseInt(event.target.value));
     setPageNumber(1);
   };
+  const handleGender = (event: any) => {
+    setGender(event.target.value);
+  };
+  const handleAge = (event: any) => {
+    setGender(event.target.value);
+  };
   const [visibleColumns, setVisibleColumns] = useState(props?.columns);
   const ref =
     useRef<HTMLDivElement>() as React.MutableRefObject<HTMLInputElement>;
   const { events } = useDraggable(ref);
+  useEffect(() => {
+    const { userListData, totalUser } = getUserList(perPage, pageNumber);
+    setUserList(userListData);
+    setTotalUser(totalUser);
+  }, [perPage, pageNumber]);
 
   return (
     <Box
@@ -85,22 +109,19 @@ export default function List(props: listProps) {
         margin: "10px 40px 0px 40px",
       }}
     >
-      <Grid container columnSpacing={5}>
+      <Grid container columnSpacing={1}>
         <Grid
           sx={{
             width: "100%",
           }}
           item
           xs={12}
-          sm={12}
-          md={3}
-          lg={3}
+          sm={6}
+          md={2}
+          lg={2}
+          container
         >
-          <StyledGrid
-            style={{
-              gap: "10px",
-            }}
-          >
+          <Grid item xs={4}>
             <Typography
               sx={{
                 padding: "7px 0px 0px 10px",
@@ -109,6 +130,8 @@ export default function List(props: listProps) {
             >
               Show
             </Typography>
+          </Grid>
+          <Grid item xs={8}>
             <StyledSelect
               value={perPage}
               onChange={handleChange}
@@ -123,7 +146,57 @@ export default function List(props: listProps) {
                   ))
                 : null}
             </StyledSelect>
-          </StyledGrid>
+          </Grid>
+        </Grid>
+        <Grid item xs={12} sm={6} md={2} lg={2} container>
+          <Grid item xs={4}>
+            <Typography
+              sx={{
+                padding: "7px 0px 0px 10px",
+                fontSize: "14px",
+              }}
+            >
+              age
+            </Typography>
+          </Grid>
+          <Grid item xs={8} height={"30px"}>
+            <StyledTextField
+              value={age}
+              onChange={handleAge}
+              type="number"
+              name="userAge"
+              size="small"
+              variant="outlined"
+            />
+          </Grid>
+        </Grid>
+        <Grid item xs={12} sm={6} md={2} lg={2} container>
+          <Grid item xs={4}>
+            <Typography
+              sx={{
+                padding: "7px 0px 0px 10px",
+                fontSize: "14px",
+              }}
+            >
+              Gender
+            </Typography>
+          </Grid>
+          <Grid item xs={8}>
+            <StyledSelectForFilter
+              value={gender}
+              onChange={handleGender}
+              id="demo-customized-select"
+              labelId="demo-customized-select-label"
+            >
+              {genderOption
+                ? genderOption.map((option) => (
+                    <MenuItem key={option.key} value={option?.key || ""}>
+                      {option?.value}
+                    </MenuItem>
+                  ))
+                : null}
+            </StyledSelectForFilter>
+          </Grid>
         </Grid>
       </Grid>
 
@@ -167,7 +240,7 @@ export default function List(props: listProps) {
               </StyledTableRow>
             </TableHead>
             <TableBody>
-              {data?.map((row: any, index) => (
+              {userList?.map((row: any, index) => (
                 <StyledTableRow key={index}>
                   {visibleColumns.map((col: any) => (
                     <>
@@ -209,7 +282,7 @@ export default function List(props: listProps) {
           </Table>
         </TableContainer>
         <Paginate
-          totalEntries={totalOrders}
+          totalEntries={totalUser}
           perPage={perPage}
           pageNumber={pageNumber}
           paginationHandler={(e: any, value: number) => setPageNumber(value)}

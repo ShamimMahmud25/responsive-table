@@ -4,7 +4,7 @@ const HeaderTitleComponent = ({ title }: { title: string }) => {
   return (
     <>
       <Grid container spacing={6}>
-        <Grid item xs={12} md={12}>
+        <Grid item xs={12} md={12} display={"flex"} justifyContent={"center"}>
           <Typography
             sx={{
               fontWeight: "700",

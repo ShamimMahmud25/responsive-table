@@ -22,7 +22,7 @@ const Paginate = ({
   const [jumpTo, setJumpTo] = useState<number>(1);
 
   return (
-    <Box display="flex" justifyContent="space-between" mt={4} py={4}>
+    <Box display="flex" justifyContent="space-between"  py={4}>
       <Typography>
         Showing {perPage * (pageNumber - 1) + 1} to{" "}
         {perPage * pageNumber > totalEntries

@@ -12,16 +12,14 @@ export default function Tablecontainer() {
       <Card sx={{ position: "relative" }}>
         <CardContent
           sx={{
-            p: (theme) => `${theme.spacing(3.75, 4.5)} !important`,
+            p: (theme) => `${theme.spacing(2, 4.5)} !important`,
           }}
-        >
-          <Grid container spacing={6}>
+        >  
             <List
               columns={columns}
               rowsData={rowData}
               showOption={optionShow}
             />
-          </Grid>
         </CardContent>
       </Card>
     </Box>
