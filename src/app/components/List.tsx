@@ -5,28 +5,15 @@ import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
-import {
-  Box,
-  Typography,
-  MenuItem,
-  TableRow,
-  TableCell,
-  TextField,
-} from "@mui/material";
+import { Box, Typography, MenuItem } from "@mui/material";
 import TableHead from "@mui/material/TableHead";
 import Paginate from "./Paginate";
 import { useDraggable } from "react-use-draggable-scroll";
-import {
-  StyledGrid,
-  StyledSelect,
-  StyledSelectForFilter,
-  StyledTableCell,
-  StyledTableRow,
-  StyledTextField,
-} from "../style";
+import { StyledSelect, StyledTableCell, StyledTableRow } from "../style";
 import { data, listItem, listProps } from "../type";
 import { getUserList } from "../actions/getUser";
-import { genderOption } from "../data";
+import { RotatingLines } from "react-loader-spinner";
+import SearchComponent from "./SearchComponent";
 
 const ItemComponent = ({ item, data }: { item: listItem; data: data }) => {
   if (item && item.field === "id") {
@@ -69,33 +56,45 @@ const ItemComponent = ({ item, data }: { item: listItem; data: data }) => {
 };
 
 export default function List(props: listProps) {
-  const data = props.rowsData;
   const [perPage, setPerPage] = useState(10);
-  const [gender, setGender] = useState("all");
-  const [age, setAge] = useState<number>();
+  const [filterData, setFilterData] = useState<string>("");
   const [pageNumber, setPageNumber] = useState(1);
   const [userList, setUserList] = useState<data[]>([]);
   const [totalUser, setTotalUser] = useState(0);
-  const [selectel, setSelectEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(selectel);
+  const [loading, setLoading] = useState(false);
   const handleChange = (event: any) => {
     setPerPage(parseInt(event.target.value));
     setPageNumber(1);
   };
-  const handleGender = (event: any) => {
-    setGender(event.target.value);
-  };
-  const handleAge = (event: any) => {
-    setGender(event.target.value);
+  const handleFilter = (value: string) => {
+    setFilterData(value);
+    if (!value) {
+      findUser(pageNumber, "");
+    }
   };
   const [visibleColumns, setVisibleColumns] = useState(props?.columns);
   const ref =
     useRef<HTMLDivElement>() as React.MutableRefObject<HTMLInputElement>;
   const { events } = useDraggable(ref);
-  useEffect(() => {
-    const { userListData, totalUser } = getUserList(perPage, pageNumber);
+
+  const handleSearch = () => {
+    setPageNumber(1);
+    findUser(1, filterData.trim());
+  };
+  const findUser = (pageNo: number, searchData: string) => {
+    setLoading(true);
+    const { userListData, totalUser } = getUserList(
+      perPage,
+      pageNo,
+      searchData
+    );
+    setLoading(false);
     setUserList(userListData);
     setTotalUser(totalUser);
+  };
+
+  useEffect(() => {
+    findUser(pageNumber, filterData.trim());
   }, [perPage, pageNumber]);
 
   return (
@@ -148,54 +147,34 @@ export default function List(props: listProps) {
             </StyledSelect>
           </Grid>
         </Grid>
-        <Grid item xs={12} sm={6} md={2} lg={2} container>
-          <Grid item xs={4}>
+        <Grid
+          sx={{
+            width: "100%",
+            gap: "5px",
+          }}
+          item
+          xs={12}
+          sm={12}
+          md={6}
+          lg={6}
+          container
+        >
+          <Grid item xs={2}>
             <Typography
               sx={{
-                padding: "7px 0px 0px 10px",
+                padding: "5px 0px 0px 10px",
                 fontSize: "14px",
               }}
             >
-              age
+              Search
             </Typography>
           </Grid>
-          <Grid item xs={8} height={"30px"}>
-            <StyledTextField
-              value={age}
-              onChange={handleAge}
-              type="number"
-              name="userAge"
-              size="small"
-              variant="outlined"
+          <Grid item xs={4}>
+            <SearchComponent
+              value={filterData}
+              onChange={handleFilter}
+              handleSearch={handleSearch}
             />
-          </Grid>
-        </Grid>
-        <Grid item xs={12} sm={6} md={2} lg={2} container>
-          <Grid item xs={4}>
-            <Typography
-              sx={{
-                padding: "7px 0px 0px 10px",
-                fontSize: "14px",
-              }}
-            >
-              Gender
-            </Typography>
-          </Grid>
-          <Grid item xs={8}>
-            <StyledSelectForFilter
-              value={gender}
-              onChange={handleGender}
-              id="demo-customized-select"
-              labelId="demo-customized-select-label"
-            >
-              {genderOption
-                ? genderOption.map((option) => (
-                    <MenuItem key={option.key} value={option?.key || ""}>
-                      {option?.value}
-                    </MenuItem>
-                  ))
-                : null}
-            </StyledSelectForFilter>
           </Grid>
         </Grid>
       </Grid>
@@ -239,6 +218,26 @@ export default function List(props: listProps) {
                 ))}
               </StyledTableRow>
             </TableHead>
+            {loading ? (
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  zIndex: 1,
+                }}
+              >
+                <RotatingLines
+                  strokeColor="#009EFA"
+                  strokeWidth="5"
+                  animationDuration="0.75"
+                  width="80"
+                  visible={true}
+                />
+              </Box>
+            ) : (
+              ""
+            )}
             <TableBody>
               {userList?.map((row: any, index) => (
                 <StyledTableRow key={index}>

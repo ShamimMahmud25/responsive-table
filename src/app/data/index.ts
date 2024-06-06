@@ -53,21 +53,6 @@ export const optionShow = [
     }
 ];
 
-export const genderOption =[
-  {
-    key:"all",
-    value:"All"
- },
-   {
-      key:"male",
-      value:"Male"
-   },
-   {
-    key:"female",
-    value:"Female"
- }
-]
-
 export const rowData =[
     {
         id: "665dbd5e89979d8893fdbac1",

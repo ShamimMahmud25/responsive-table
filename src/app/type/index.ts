@@ -36,7 +36,14 @@ interface ShowOption {
 }
 
 export type listProps = {
-    rowsData: object[];
     columns: object[];
     showOption: ShowOption[];
 };
+
+export type searchProps = {
+    placeholder?: string
+    value?: string
+    onChange?: (value: string) => void
+    style?: React.CSSProperties
+    handleSearch: ()=>void
+  }
