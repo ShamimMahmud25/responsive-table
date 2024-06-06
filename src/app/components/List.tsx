@@ -1,21 +1,19 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
-import { Box, Typography, MenuItem, TableRow, TableCell } from "@mui/material";
+import { Box, Typography, MenuItem } from "@mui/material";
 import TableHead from "@mui/material/TableHead";
 import Paginate from "./Paginate";
 import { useDraggable } from "react-use-draggable-scroll";
-import {
-  StyledGrid,
-  StyledSelect,
-  StyledTableCell,
-  StyledTableRow,
-} from "../style";
+import { StyledSelect, StyledTableCell, StyledTableRow } from "../style";
 import { data, listItem, listProps } from "../type";
+import { getUserList } from "../actions/getUser";
+import { RotatingLines } from "react-loader-spinner";
+import SearchComponent from "./SearchComponent";
 
 const ItemComponent = ({ item, data }: { item: listItem; data: data }) => {
   if (item && item.field === "id") {
@@ -48,7 +46,7 @@ const ItemComponent = ({ item, data }: { item: listItem; data: data }) => {
     return (
       <>
         {data?.friends.map((item: any) => (
-          <ul key={item.id} style={{listStyleType:"none"}}>
+          <ul key={item.id} style={{ listStyleType: "none" }}>
             <li>{item?.name ? item?.name : ""}</li>
           </ul>
         ))}
@@ -58,21 +56,46 @@ const ItemComponent = ({ item, data }: { item: listItem; data: data }) => {
 };
 
 export default function List(props: listProps) {
-  const data = props.rowsData;
   const [perPage, setPerPage] = useState(10);
+  const [filterData, setFilterData] = useState<string>("");
   const [pageNumber, setPageNumber] = useState(1);
-
-  const totalOrders = 20;
-  const [selectel, setSelectEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(selectel);
+  const [userList, setUserList] = useState<data[]>([]);
+  const [totalUser, setTotalUser] = useState(0);
+  const [loading, setLoading] = useState(false);
   const handleChange = (event: any) => {
     setPerPage(parseInt(event.target.value));
     setPageNumber(1);
+  };
+  const handleFilter = (value: string) => {
+    setFilterData(value);
+    if (!value) {
+      findUser(pageNumber, "");
+    }
   };
   const [visibleColumns, setVisibleColumns] = useState(props?.columns);
   const ref =
     useRef<HTMLDivElement>() as React.MutableRefObject<HTMLInputElement>;
   const { events } = useDraggable(ref);
+
+  const handleSearch = () => {
+    setPageNumber(1);
+    findUser(1, filterData.trim());
+  };
+  const findUser = (pageNo: number, searchData: string) => {
+    setLoading(true);
+    const { userListData, totalUser } = getUserList(
+      perPage,
+      pageNo,
+      searchData
+    );
+    setLoading(false);
+    setUserList(userListData);
+    setTotalUser(totalUser);
+  };
+
+  useEffect(() => {
+    findUser(pageNumber, filterData.trim());
+  }, [perPage, pageNumber]);
 
   return (
     <Box
@@ -85,22 +108,19 @@ export default function List(props: listProps) {
         margin: "10px 40px 0px 40px",
       }}
     >
-      <Grid container columnSpacing={5}>
+      <Grid container columnSpacing={1}>
         <Grid
           sx={{
             width: "100%",
           }}
           item
           xs={12}
-          sm={12}
-          md={3}
-          lg={3}
+          sm={6}
+          md={2}
+          lg={2}
+          container
         >
-          <StyledGrid
-            style={{
-              gap: "10px",
-            }}
-          >
+          <Grid item xs={4}>
             <Typography
               sx={{
                 padding: "7px 0px 0px 10px",
@@ -109,6 +129,8 @@ export default function List(props: listProps) {
             >
               Show
             </Typography>
+          </Grid>
+          <Grid item xs={8}>
             <StyledSelect
               value={perPage}
               onChange={handleChange}
@@ -123,7 +145,37 @@ export default function List(props: listProps) {
                   ))
                 : null}
             </StyledSelect>
-          </StyledGrid>
+          </Grid>
+        </Grid>
+        <Grid
+          sx={{
+            width: "100%",
+            gap: "5px",
+          }}
+          item
+          xs={12}
+          sm={12}
+          md={6}
+          lg={6}
+          container
+        >
+          <Grid item xs={2}>
+            <Typography
+              sx={{
+                padding: "5px 0px 0px 10px",
+                fontSize: "14px",
+              }}
+            >
+              Search
+            </Typography>
+          </Grid>
+          <Grid item xs={4}>
+            <SearchComponent
+              value={filterData}
+              onChange={handleFilter}
+              handleSearch={handleSearch}
+            />
+          </Grid>
         </Grid>
       </Grid>
 
@@ -166,8 +218,28 @@ export default function List(props: listProps) {
                 ))}
               </StyledTableRow>
             </TableHead>
+            {loading ? (
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  zIndex: 1,
+                }}
+              >
+                <RotatingLines
+                  strokeColor="#009EFA"
+                  strokeWidth="5"
+                  animationDuration="0.75"
+                  width="80"
+                  visible={true}
+                />
+              </Box>
+            ) : (
+              ""
+            )}
             <TableBody>
-              {data?.map((row: any, index) => (
+              {userList?.map((row: any, index) => (
                 <StyledTableRow key={index}>
                   {visibleColumns.map((col: any) => (
                     <>
@@ -209,7 +281,7 @@ export default function List(props: listProps) {
           </Table>
         </TableContainer>
         <Paginate
-          totalEntries={totalOrders}
+          totalEntries={totalUser}
           perPage={perPage}
           pageNumber={pageNumber}
           paginationHandler={(e: any, value: number) => setPageNumber(value)}

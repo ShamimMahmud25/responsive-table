@@ -1,4 +1,4 @@
-import { Grid, Select, TableRow } from "@mui/material";
+import { Grid, Select, TableRow, TextField } from "@mui/material";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import { styled } from "@mui/material/styles";
 
@@ -19,6 +19,23 @@ export const StyledSelect = styled(Select)({
     borderRadius: "0px",
     height: "36px",
     width: "80px",
+    margin: "3px",
+    boxShadow: "inset 1px 1.5px 5px rgba(22, 31, 41, 0.2)",
+});
+export const StyledTextField = styled(TextField)({
+    background: "white",
+    borderRadius: "0px",
+    height: "36px",
+    margin: "3px",
+    width:"80px",
+    boxShadow: "inset 1px 1.5px 5px rgba(22, 31, 41, 0.2)",
+});
+
+export const StyledSelectForFilter = styled(Select)({
+    background: "white",
+    borderRadius: "0px",
+    height: "36px",
+    width:"100%",
     margin: "3px",
     boxShadow: "inset 1px 1.5px 5px rgba(22, 31, 41, 0.2)",
 });
@@ -62,3 +79,5 @@ export const StyledTableRow = styled(TableRow)(() => ({
         background: "rgba(22, 31, 41, 0.03)",
     },
 }));
+
+

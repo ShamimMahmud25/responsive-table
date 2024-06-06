@@ -1,9 +1,9 @@
 "use client";
 import List from "./List";
-import { columns, optionShow, rowData } from "../data";
+import { columns, optionShow } from "../data";
 
 import HeaderTitleComponent from "./HeaderTitleComponent";
-import { Box, Card, CardContent, Grid } from "@mui/material";
+import { Box, Card, CardContent } from "@mui/material";
 
 export default function Tablecontainer() {
   return (
@@ -12,16 +12,10 @@ export default function Tablecontainer() {
       <Card sx={{ position: "relative" }}>
         <CardContent
           sx={{
-            p: (theme) => `${theme.spacing(3.75, 4.5)} !important`,
+            p: (theme) => `${theme.spacing(2, 4.5)} !important`,
           }}
         >
-          <Grid container spacing={6}>
-            <List
-              columns={columns}
-              rowsData={rowData}
-              showOption={optionShow}
-            />
-          </Grid>
+          <List columns={columns} showOption={optionShow} />
         </CardContent>
       </Card>
     </Box>
